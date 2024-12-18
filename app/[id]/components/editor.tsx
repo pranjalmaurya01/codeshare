@@ -12,6 +12,7 @@ import { EditorTabs, TabState } from './editorTabs';
 function Editor({ id }: { id: string }) {
   const [selectedTheme, setSelectedTheme] =
     useState<CSSStyleDeclaration | null>(null);
+  const [isEditorReady, setIsEditorReady] = useState(false);
 
   const [tabs, setTabs] = useState<{ active: string; all: TabState[] }>({
     active: 'ac',
@@ -75,17 +76,23 @@ function Editor({ id }: { id: string }) {
               activeTab={tabs.active}
             />
             {tabs.active ? (
-              <CodeMirror
-                ref={editorRef}
-                basicSetup={{
-                  foldGutter: true,
-                }}
-                className='flex-1'
-                height='100%'
-                value={value}
-                onChange={onChange}
-                theme={vscodeDark}
-              />
+              <>
+                {!isEditorReady && <div className='flex-1 bg-black/90' />}
+                <CodeMirror
+                  ref={editorRef}
+                  basicSetup={{
+                    foldGutter: true,
+                  }}
+                  className={cn('flex-1', isEditorReady ? 'block' : 'hidden')}
+                  height='100%'
+                  value={value}
+                  onChange={onChange}
+                  theme={vscodeDark}
+                  onCreateEditor={() => {
+                    setIsEditorReady(true);
+                  }}
+                />
+              </>
             ) : (
               <div
                 className={cn(
