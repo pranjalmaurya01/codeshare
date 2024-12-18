@@ -9,7 +9,7 @@ import { EditorContext } from './EditorContext';
 import { EditorSidebar } from './editorSideMenu';
 import { EditorTabs, TabState } from './editorTabs';
 
-function Editor({ id }: { id: string }) {
+function Editor({ id }: { id: string | null }) {
   const [selectedTheme, setSelectedTheme] =
     useState<CSSStyleDeclaration | null>(null);
   const [isEditorReady, setIsEditorReady] = useState(false);
