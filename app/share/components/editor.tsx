@@ -36,19 +36,15 @@ function Editor({ id }: { id: string | null }) {
 
   useEffect(() => {
     // Use a slight delay to ensure the DOM is fully rendered
-    const timer = setTimeout(() => {
-      if (editorRef.current) {
-        const editorElement =
-          editorRef.current.editor?.querySelector('div.cm-editor');
-        if (editorElement) {
-          const style = window.getComputedStyle(editorElement);
-          setSelectedTheme({ ...style });
-        }
+    if (isEditorReady && editorRef.current) {
+      const editorElement =
+        editorRef.current.editor?.querySelector('div.cm-editor');
+      if (editorElement) {
+        const style = window.getComputedStyle(editorElement);
+        setSelectedTheme({ ...style });
       }
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, []);
+    }
+  }, [isEditorReady]);
 
   return (
     <EditorContext.Provider value={{ id, theme: selectedTheme }}>
@@ -68,8 +64,6 @@ function Editor({ id }: { id: string | null }) {
                 });
               }}
               onTabChange={(id: string) => {
-                console.log('active tab');
-
                 setTabs((prev) => ({ ...prev, active: id }));
               }}
               tabs={tabs.all}
