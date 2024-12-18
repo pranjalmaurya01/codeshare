@@ -9,7 +9,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  ChevronRight,
   ListCollapseIcon as CollapseAll,
   FileIcon,
   FilePlus,
@@ -17,16 +16,19 @@ import {
   FolderPlus,
   RefreshCw,
 } from 'lucide-react';
-import * as React from 'react';
+import { useContext, useState } from 'react';
 import { PROJECT_FILES } from './constants';
+import { EditorContext } from './EditorContext';
 import { FileStructure } from './editorSideMenu';
 
 interface FileExplorerProps {
   onToggle: () => void;
 }
 
-export function FileExplorer({ onToggle }: FileExplorerProps) {
-  const [expanded, setExpanded] = React.useState<Record<string, boolean>>({
+export function FileExplorer({}: FileExplorerProps) {
+  const { id } = useContext(EditorContext);
+
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({
     src: true,
     components: true,
   });
@@ -53,8 +55,8 @@ export function FileExplorer({ onToggle }: FileExplorerProps) {
   return (
     <div className='flex h-full flex-col'>
       <div className='flex items-center justify-between p-2'>
-        <div className='flex items-center gap-1'>
-          <span className='text-sm font-medium'>EXPLORER</span>
+        <span className='text-sm font-medium'>{id}</span>
+        <div>
           <TooltipProvider>
             <div className='flex items-center'>
               <Tooltip delayDuration={0}>
@@ -131,9 +133,8 @@ export function FileExplorer({ onToggle }: FileExplorerProps) {
               </Tooltip>
             </div>
           </TooltipProvider>
-        </div>
-        <div className='flex items-center gap-1'>
-          {/* <DropdownMenu>
+          {/* <div className='flex items-center gap-1'>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant='ghost' size='icon' className='h-6 w-6'>
                 <MoreHorizontal className='h-4 w-4' />
@@ -149,7 +150,7 @@ export function FileExplorer({ onToggle }: FileExplorerProps) {
                 <span>Refresh Explorer</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu> */}
+          </DropdownMenu>
           <Button
             variant='ghost'
             size='icon'
@@ -158,6 +159,7 @@ export function FileExplorer({ onToggle }: FileExplorerProps) {
           >
             <ChevronRight className='h-4 w-4' />
           </Button>
+        </div> */}
         </div>
       </div>
       <ScrollArea className='flex-1'>

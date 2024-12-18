@@ -34,16 +34,17 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { HTMLAttributes, useState } from 'react';
+import { HTMLAttributes, useContext, useState } from 'react';
 import { SIDEBAR_ICONS } from './constants';
+import { EditorContext } from './EditorContext';
 import { FileExplorer } from './fileExplorer';
 import { SearchPanel } from './searchPanel';
 
-interface SidebarProps extends HTMLAttributes<HTMLDivElement> {
-  theme: CSSStyleDeclaration | null;
-}
+type SidebarProps = HTMLAttributes<HTMLDivElement>;
 
-export function EditorSidebar({ className, theme }: SidebarProps) {
+export function EditorSidebar({ className }: SidebarProps) {
+  const { theme } = useContext(EditorContext);
+
   const [activeIcon, setActiveIcon] = useState<string>('files');
   const [isExpanded, setIsExpanded] = useState(true);
 
