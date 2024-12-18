@@ -19,6 +19,7 @@ interface EditorTabsProps {
   activeTab?: string;
   onTabChange: (tabId: string) => void;
   onTabClose: (tabId: string) => void;
+  onNewFileCreate: () => void;
 }
 
 export function EditorTabs({
@@ -26,6 +27,7 @@ export function EditorTabs({
   activeTab,
   onTabChange,
   onTabClose,
+  onNewFileCreate,
 }: EditorTabsProps) {
   const { theme } = useContext(EditorContext);
 
@@ -46,13 +48,18 @@ export function EditorTabs({
               size='sm'
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                'group h-8 rounded-none border-r border-zinc-800 flex items-center justify-end',
-                activeTab === tab.id && 'bg-zinc-800'
+                'group h-8 rounded-none border-r border-zinc-800 flex items-center justify-end hover:text-white',
+                activeTab === tab.id && '!bg-black/50'
               )}
+              style={{
+                backgroundColor: theme?.backgroundColor,
+                color: theme?.color,
+              }}
             >
               <span className='max-w-[160px] truncate text-sm'>
                 {tab.label}
               </span>
+
               {tab.isModified ? (
                 <span className='ml-2 flex h-2 w-2'>
                   <span className='absolute inline-flex h-2 w-2'>
@@ -79,10 +86,9 @@ export function EditorTabs({
           ))}
 
           <div
-            className='flex-1'
+            className='flex-1 cursor-pointer'
             onDoubleClick={() => {
-              console.log('create new file');
-              // ! Create new file with unique id on client side
+              onNewFileCreate();
             }}
           />
         </div>

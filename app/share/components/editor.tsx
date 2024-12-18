@@ -1,10 +1,10 @@
 'use client';
 // https://www.npmjs.com/package/@uiw/react-codemirror
 
-import { cn } from '@/lib/utils';
+import { cn, getRandomId } from '@/lib/utils';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
-import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { EditorContext } from './EditorContext';
 import { EditorSidebar } from './editorSideMenu';
 import { EditorTabs, TabState } from './editorTabs';
@@ -15,24 +15,32 @@ function Editor({ id }: { id: string | null }) {
   const [isEditorReady, setIsEditorReady] = useState(false);
 
   const [tabs, setTabs] = useState<{ active: string; all: TabState[] }>({
-    active: 'ac',
-    all: [
-      {
-        id: 'ac',
-        label: 'hello',
-        path: 'filepath',
-        isModified: false,
-      },
-    ],
+    active: '',
+    all: [],
   });
   const [value, setValue] = useState('');
   // const [editorTheme,setEditorTheme] = useState('')
 
   const editorRef = useRef<ReactCodeMirrorRef | null>(null);
 
-  const onChange = useCallback((val: string) => {
+  const onChange = (val: string) => {
     setValue(val);
-  }, []);
+  };
+
+  function createNewFile() {
+    const newFile = {
+      id: getRandomId(),
+      label: `new file`,
+      path: 'filepath',
+      isModified: false,
+    };
+
+    setTabs((prev) => ({
+      ...prev,
+      all: [...prev.all, newFile],
+      active: newFile.id,
+    }));
+  }
 
   useEffect(() => {
     // Use a slight delay to ensure the DOM is fully rendered
@@ -45,6 +53,13 @@ function Editor({ id }: { id: string | null }) {
       }
     }
   }, [isEditorReady]);
+
+  // smoothly show black background incase all files have been closed and then a file is opened
+  useEffect(() => {
+    if (!tabs.active) {
+      setIsEditorReady(false);
+    }
+  }, [tabs.active]);
 
   return (
     <Suspense fallback={<div className='h-screen w-screen bg-black/90' />}>
@@ -69,6 +84,7 @@ function Editor({ id }: { id: string | null }) {
                 }}
                 tabs={tabs.all}
                 activeTab={tabs.active}
+                onNewFileCreate={createNewFile}
               />
               {tabs.active ? (
                 <>
