@@ -5,9 +5,32 @@ import { cn, getRandomId } from '@/lib/utils';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { Suspense, useEffect, useRef, useState } from 'react';
+import { yCollab } from 'y-codemirror.next';
+import { WebrtcProvider } from 'y-webrtc';
+import * as Y from 'yjs';
 import { EditorContext } from './EditorContext';
 import { EditorSidebar } from './editorSideMenu';
 import { EditorTabs, TabState } from './editorTabs';
+
+let sharedYDoc = null;
+let sharedProvider = null;
+
+const getSharedYDoc = () => {
+  if (!sharedYDoc) {
+    sharedYDoc = new Y.Doc();
+  }
+  return sharedYDoc;
+};
+
+export const getWebrtcProvider = (roomName, ydoc) => {
+  if (!sharedProvider) {
+    sharedProvider = new WebrtcProvider(roomName, ydoc);
+    sharedProvider.on('status', (event) => {
+      console.log('WebRTC status:', event);
+    });
+  }
+  return sharedProvider;
+};
 
 function Editor({ id }: { id: string | null }) {
   const [selectedTheme, setSelectedTheme] =
@@ -15,8 +38,15 @@ function Editor({ id }: { id: string | null }) {
   const [isEditorReady, setIsEditorReady] = useState(false);
 
   const [tabs, setTabs] = useState<{ active: string; all: TabState[] }>({
-    active: '',
-    all: [],
+    active: 'def',
+    all: [
+      {
+        id: 'def',
+        label: `new file`,
+        path: 'filepath',
+        isModified: false,
+      },
+    ],
   });
   const [value, setValue] = useState('');
   // const [editorTheme,setEditorTheme] = useState('')
@@ -61,6 +91,11 @@ function Editor({ id }: { id: string | null }) {
     }
   }, [tabs.active]);
 
+  const ydoc = getSharedYDoc();
+  const provider = getWebrtcProvider('codemirror6-demo-room', ydoc);
+  const ytext = ydoc.getText('codemirror');
+  const undoManager = new Y.UndoManager(ytext);
+
   return (
     <Suspense fallback={<div className='h-screen w-screen bg-black/90' />}>
       <EditorContext.Provider value={{ id, theme: selectedTheme }}>
@@ -90,18 +125,17 @@ function Editor({ id }: { id: string | null }) {
                 <>
                   {!isEditorReady && <div className='flex-1 bg-black/90' />}
                   <CodeMirror
+                    basicSetup={true}
                     ref={editorRef}
-                    basicSetup={{
-                      foldGutter: true,
-                    }}
                     className={cn('flex-1', isEditorReady ? 'block' : 'hidden')}
                     height='100%'
-                    value={value}
-                    onChange={onChange}
                     theme={vscodeDark}
                     onCreateEditor={() => {
                       setIsEditorReady(true);
                     }}
+                    extensions={[
+                      yCollab(ytext, provider.awareness, { undoManager }),
+                    ]}
                   />
                 </>
               ) : (

@@ -23,7 +23,10 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^2.5.5",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "y-codemirror.next": "^0.3.5",
+    "y-webrtc": "^10.3.0",
+    "yjs": "^13.6.20"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
