@@ -1,3 +1,5 @@
+'use client';
+
 import { getYjsDoc, syncedStore } from '@syncedstore/core';
 import { WebsocketProvider } from 'y-websocket';
 
@@ -10,6 +12,8 @@ const doc = getYjsDoc(store);
 
 export const provider = new WebsocketProvider(
   process.env.NEXT_PUBLIC_SIGNALING_WEBSOCKET_SERVER!,
-  'codemirror6-demo-room',
+  'codemirror6-demo-room-new',
   doc
 );
+
+export const awareness = provider.awareness;

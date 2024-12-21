@@ -2,11 +2,15 @@
 // https://www.npmjs.com/package/@uiw/react-codemirror
 
 import { cn, getRandomId } from '@/lib/utils';
+import dynamic from 'next/dynamic';
 import { Suspense, useEffect, useState } from 'react';
-import CodeMirrorEditor from './editor';
 import { EditorContext } from './EditorContext';
 import { EditorSidebar } from './editorSideMenu';
 import { EditorTabs, TabState } from './editorTabs';
+
+const CodeMirrorEditor = dynamic(() => import('./editor'), {
+  ssr: false,
+});
 
 export interface EditorReadyI {
   isSynced: boolean;
@@ -83,6 +87,7 @@ function Editor({ id }: { id: string | null }) {
                   {!isEditorReady.showEditor && (
                     <div className='flex-1 bg-black/90 h-full' />
                   )}
+
                   <CodeMirrorEditor
                     isEditorReady={isEditorReady}
                     setIsEditorReady={setIsEditorReady}
