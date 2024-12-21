@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
 export const EditorContext = createContext<{
-  theme: CSSStyleDeclaration | null;
+  activeTabId: string;
   id: string | null;
-}>({ theme: null, id: null });
+}>({ id: null, activeTabId: '' });

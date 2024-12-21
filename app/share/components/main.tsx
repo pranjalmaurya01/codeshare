@@ -1,7 +1,7 @@
 'use client';
 // https://www.npmjs.com/package/@uiw/react-codemirror
 
-import { cn, getRandomId } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import { Suspense, useEffect, useState } from 'react';
 import { EditorContext } from './EditorContext';
@@ -24,10 +24,10 @@ function Editor({ id }: { id: string | null }) {
   });
 
   const [tabs, setTabs] = useState<{ active: string; all: TabState[] }>({
-    active: 'def',
+    active: 'a',
     all: [
       {
-        id: 'def',
+        id: 'a',
         label: `new file`,
         path: 'filepath',
         isModified: false,
@@ -37,7 +37,7 @@ function Editor({ id }: { id: string | null }) {
 
   function createNewFile() {
     const newFile = {
-      id: getRandomId(),
+      id: 'b',
       label: `new file`,
       path: 'filepath',
       isModified: false,
@@ -59,7 +59,7 @@ function Editor({ id }: { id: string | null }) {
 
   return (
     <Suspense fallback={<div className='h-screen w-screen bg-black/90' />}>
-      <EditorContext.Provider value={{ id, theme: null }}>
+      <EditorContext.Provider value={{ id, activeTabId: tabs.active }}>
         <div className='flex'>
           <EditorSidebar />
           <div className='flex-1'>
@@ -87,11 +87,18 @@ function Editor({ id }: { id: string | null }) {
                   {!isEditorReady.showEditor && (
                     <div className='flex-1 bg-black/90 h-full' />
                   )}
-
-                  <CodeMirrorEditor
-                    isEditorReady={isEditorReady}
-                    setIsEditorReady={setIsEditorReady}
-                  />
+                  {tabs.all.map((t) => (
+                    <div
+                      key={t.id}
+                      className={cn(t.id === tabs.active ? 'h-full' : 'h-0')}
+                    >
+                      <CodeMirrorEditor
+                        isEditorReady={isEditorReady}
+                        activeTabId={tabs.active}
+                        setIsEditorReady={setIsEditorReady}
+                      />
+                    </div>
+                  ))}
                 </>
               ) : (
                 <div

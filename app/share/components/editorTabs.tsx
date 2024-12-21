@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
-import { useContext } from 'react';
-import { EditorContext } from './EditorContext';
 
 export interface TabState {
   id: string;
@@ -29,16 +27,8 @@ export function EditorTabs({
   onTabClose,
   onNewFileCreate,
 }: EditorTabsProps) {
-  const { theme } = useContext(EditorContext);
-
   return (
-    <div
-      className={cn(
-        'border-b border-zinc-800',
-        !theme && 'bg-black/90 text-white'
-      )}
-      style={{ backgroundColor: theme?.backgroundColor, color: theme?.color }}
-    >
+    <div className={cn('border-b border-zinc-800 bg-black/90 text-white')}>
       <ScrollArea className='w-full' type='scroll'>
         <div className='flex h-8'>
           {tabs.map((tab) => (
@@ -51,10 +41,6 @@ export function EditorTabs({
                 'group h-8 rounded-none border-r border-zinc-800 flex items-center justify-end hover:text-white',
                 activeTab === tab.id && '!bg-black/50'
               )}
-              style={{
-                backgroundColor: theme?.backgroundColor,
-                color: theme?.color,
-              }}
             >
               <span className='max-w-[160px] truncate text-sm'>
                 {tab.label}

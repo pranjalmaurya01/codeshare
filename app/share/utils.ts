@@ -28,3 +28,37 @@ export function detectLanguage(code: string) {
 
   return 'Unknown';
 }
+
+export function generateRandomColor() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgba(${r}, ${g}, ${b}, 0.5)`;
+}
+
+export function addUserSelectionStyle(color: string) {
+  const styleTag = document.createElement('style');
+  styleTag.id = `user-style-monaco`;
+  styleTag.innerHTML = `
+.yRemoteSelection {
+  background-color: ${color};
+}
+.yRemoteSelectionHead {
+  position: absolute;
+  border-left: ${color} solid 2px;
+  border-top: ${color} solid 2px;
+  border-bottom: ${color} solid 2px;
+  height: 100%;
+  box-sizing: border-box;
+}
+.yRemoteSelectionHead::after {
+  position: absolute;
+  content: ' ';
+  border: 3px solid ${color};
+  border-radius: 4px;
+  left: -4px;
+  top: -5px;
+}
+  `;
+  document.head.appendChild(styleTag);
+}

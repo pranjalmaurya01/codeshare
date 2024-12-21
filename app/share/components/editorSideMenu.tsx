@@ -34,17 +34,14 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { HTMLAttributes, useContext, useState } from 'react';
+import { HTMLAttributes, useState } from 'react';
 import { SIDEBAR_ICONS } from './constants';
-import { EditorContext } from './EditorContext';
 import { FileExplorer } from './fileExplorer';
 import { SearchPanel } from './searchPanel';
 
 type SidebarProps = HTMLAttributes<HTMLDivElement>;
 
 export function EditorSidebar({ className }: SidebarProps) {
-  const { theme } = useContext(EditorContext);
-
   const [activeIcon, setActiveIcon] = useState<string>('files');
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -61,10 +58,8 @@ export function EditorSidebar({ className }: SidebarProps) {
     <div className={cn('flex', className)}>
       <div
         className={cn(
-          'flex w-16 flex-col items-center border-r',
-          !theme && 'bg-black/90 text-white'
+          'flex w-16 flex-col items-center border-r bg-black/90 text-white'
         )}
-        style={{ backgroundColor: theme?.backgroundColor, color: theme?.color }}
       >
         <TooltipProvider>
           {SIDEBAR_ICONS.map(({ name, icon: Icon, label }) => (
