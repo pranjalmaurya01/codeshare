@@ -8,8 +8,16 @@ import { EditorContext } from './EditorContext';
 import { EditorSidebar } from './editorSideMenu';
 import { EditorTabs, TabState } from './editorTabs';
 
+export interface EditorReadyI {
+  isSynced: boolean;
+  showEditor: boolean;
+}
+
 function Editor({ id }: { id: string | null }) {
-  const [, setIsEditorReady] = useState(false);
+  const [isEditorReady, setIsEditorReady] = useState<EditorReadyI>({
+    isSynced: false,
+    showEditor: false,
+  });
 
   const [tabs, setTabs] = useState<{ active: string; all: TabState[] }>({
     active: 'def',
@@ -22,9 +30,6 @@ function Editor({ id }: { id: string | null }) {
       },
     ],
   });
-  // const [editorTheme,setEditorTheme] = useState('')
-
-  // const editorRef = useRef<ReactCodeMirrorRef | null>(null);
 
   function createNewFile() {
     const newFile = {
@@ -41,22 +46,10 @@ function Editor({ id }: { id: string | null }) {
     }));
   }
 
-  // useEffect(() => {
-  //   // Use a slight delay to ensure the DOM is fully rendered
-  //   if (isEditorReady && editorRef.current) {
-  //     const editorElement =
-  //       editorRef.current.editor?.querySelector('div.cm-editor');
-  //     if (editorElement) {
-  //       const style = window.getComputedStyle(editorElement);
-  //       setSelectedTheme({ ...style });
-  //     }
-  //   }
-  // }, [isEditorReady]);
-
   // smoothly show black background incase all files have been closed and then a file is opened
   useEffect(() => {
     if (!tabs.active) {
-      setIsEditorReady(false);
+      setIsEditorReady((prev) => ({ ...prev, showEditor: true }));
     }
   }, [tabs.active]);
 
@@ -87,25 +80,13 @@ function Editor({ id }: { id: string | null }) {
               />
               {tabs.active ? (
                 <>
-                  {/* {!isEditorReady && <div className='flex-1 bg-black/90' />} */}
-                  {/* <CodeMirror
-                    basicSetup={true}
-                    ref={editorRef}
-                    className={cn('flex-1', isEditorReady ? 'block' : 'hidden')}
-                    height='100%'
-                    theme={vscodeDark}
-                    onCreateEditor={() => {
-                      setIsEditorReady(true);
-                    }}
-                    onUpdate={(e) => {
-                      console.log(e);
-                    }}
-                    value={ytext.toJSON()}
-                    extensions={[
-                      yCollab(ytext, provider?.awareness, { undoManager }),
-                    ]}
-                  /> */}
-                  <CodeMirrorEditor />
+                  {!isEditorReady.showEditor && (
+                    <div className='flex-1 bg-black/90 h-full' />
+                  )}
+                  <CodeMirrorEditor
+                    isEditorReady={isEditorReady}
+                    setIsEditorReady={setIsEditorReady}
+                  />
                 </>
               ) : (
                 <div
