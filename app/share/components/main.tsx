@@ -1,5 +1,4 @@
 'use client';
-// https://www.npmjs.com/package/@uiw/react-codemirror
 
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
@@ -83,27 +82,16 @@ function Editor({ id }: { id: string | null }) {
                 onNewFileCreate={createNewFile}
               />
               {tabs.active ? (
-                <>
-                  {!isEditorReady.showEditor && (
-                    <div className='flex-1 bg-black/90 h-full' />
-                  )}
-                  {tabs.all.map((t) => (
-                    <div
-                      key={t.id}
-                      className={cn(t.id === tabs.active ? 'h-full' : 'h-0')}
-                    >
-                      <CodeMirrorEditor
-                        isEditorReady={isEditorReady}
-                        activeTabId={tabs.active}
-                        setIsEditorReady={setIsEditorReady}
-                      />
-                    </div>
-                  ))}
-                </>
+                <CodeMirrorEditor
+                  key={tabs.active}
+                  isEditorReady={isEditorReady}
+                  activeTabId={tabs.active}
+                  setIsEditorReady={setIsEditorReady}
+                />
               ) : (
                 <div
                   className={cn(
-                    'border-b border-zinc-800 h-full bg-black/90 text-white'
+                    'border-b border-zinc-800 h-full bg-black text-white'
                   )}
                 />
               )}

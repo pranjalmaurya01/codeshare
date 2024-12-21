@@ -23,6 +23,7 @@ const CodeMirrorEditor = ({
     provider.on('sync', (event) => {
       setIsEditorReady((prev) => ({ ...prev, isSynced: event }));
     });
+
     awareness.on('change', ({ added }: any) => {
       added.forEach((userId: number) => {
         addUserSelectionStyle(awareness.getStates().get(userId)?.user.color);
@@ -33,6 +34,7 @@ const CodeMirrorEditor = ({
   }, []);
 
   function handleEditorDidMount(editor: any) {
+    setIsEditorReady((prev) => ({ ...prev, showEditor: true }));
     editorRef.current = editor;
     awareness.setLocalStateField('user', {
       name: 'Anonymous ' + Math.floor(Math.random() * 100),
@@ -47,19 +49,20 @@ const CodeMirrorEditor = ({
       new Set([editorRef.current]),
       awareness
     );
-
-    // Update user styles dynamically
-    setIsEditorReady((prev) => ({ ...prev, showEditor: true }));
   }
 
   return (
     <Editor
+      options={{
+        readOnly: !isEditorReady.isSynced,
+        readOnlyMessage: {
+          supportHtml: true,
+          value: 'Syncing Please Wait',
+        },
+      }}
       theme='vs-dark'
       onMount={handleEditorDidMount}
-      className={cn(
-        'flex-1 w-full',
-        isEditorReady.showEditor ? 'block' : 'hidden'
-      )}
+      className={cn('flex-1 w-full animate-in')}
     />
   );
 };
