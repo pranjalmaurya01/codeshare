@@ -1,7 +1,7 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import Editor from './components/editor';
+import Editor from './components/main';
 
 // https://docs.convex.dev/client/react/nextjs/server-rendering
 
