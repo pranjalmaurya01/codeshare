@@ -57,9 +57,7 @@ export function EditorSidebar({ className }: SidebarProps) {
   return (
     <div className={cn('flex', className)}>
       <div
-        className={cn(
-          'flex w-16 flex-col items-center border-r bg-black/90 text-white'
-        )}
+        className={cn('flex w-16 flex-col items-center border-r  text-white')}
       >
         <TooltipProvider>
           {SIDEBAR_ICONS.map(({ name, icon: Icon, label }) => (
@@ -70,26 +68,21 @@ export function EditorSidebar({ className }: SidebarProps) {
                   className={cn(
                     'relative h-16 w-16 rounded-none',
                     activeIcon === name &&
-                      'bg-zinc-800 before:absolute before:left-0 before:h-6 before:w-[2px] before:bg-blue-500'
+                      ' before:absolute before:left-0 before:h-6 before:w-[2px] before:bg-blue-500'
                   )}
                   onClick={() => handleIconClick(name)}
                 >
                   <Icon className='h-5 w-5' />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent
-                side='right'
-                className='border-zinc-800 bg-zinc-900'
-              >
-                {label}
-              </TooltipContent>
+              <TooltipContent side='right'>{label}</TooltipContent>
             </Tooltip>
           ))}
         </TooltipProvider>
       </div>
       {isExpanded && (
         <div className='w-64 transition-all duration-300 ease-in-out'>
-          <div className='h-full bg-zinc-900 text-zinc-400'>
+          <div className='h-full '>
             {activeIcon === 'files' && (
               <FileExplorer onToggle={() => setIsExpanded(false)} />
             )}

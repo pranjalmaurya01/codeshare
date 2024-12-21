@@ -4,29 +4,33 @@ import { cn } from '@/lib/utils';
 import Editor from '@monaco-editor/react';
 import { Dispatch, SetStateAction, useEffect, useRef } from 'react';
 import { MonacoBinding } from 'y-monaco';
-import { addUserSelectionStyle, generateRandomColor } from '../utils';
-import { EditorReadyI } from './main';
-import { awareness, mainYDoc, provider } from './store';
+import { WebsocketProvider } from 'y-websocket';
+import { addUserSelectionStyle } from '../utils';
+import { EditorReadyI, mainYDoc } from './main';
 
 const CodeMirrorEditor = ({
+  provider,
   activeTabId,
   isEditorReady,
   setIsEditorReady,
 }: {
+  provider: WebsocketProvider;
   activeTabId: string;
   isEditorReady: EditorReadyI;
   setIsEditorReady: Dispatch<SetStateAction<EditorReadyI>>;
 }) => {
   const editorRef = useRef<any>(null);
+  const { awareness } = provider;
 
   useEffect(() => {
-    provider.on('sync', (event) => {
-      setIsEditorReady((prev) => ({ ...prev, isSynced: event }));
-    });
-
-    awareness.on('change', ({ added }: any) => {
-      added.forEach((userId: number) => {
-        addUserSelectionStyle(awareness.getStates().get(userId)?.user.color);
+    awareness.on('change', ({ added, updated }: any) => {
+      [...added, ...updated].forEach((userId: number) => {
+        if (
+          awareness.getStates().get(userId)?.user &&
+          awareness.getStates().get(userId)?.user.color
+        ) {
+          addUserSelectionStyle(awareness.getStates().get(userId)?.user.color);
+        }
       });
     });
 
@@ -36,10 +40,6 @@ const CodeMirrorEditor = ({
   function handleEditorDidMount(editor: any) {
     setIsEditorReady((prev) => ({ ...prev, showEditor: true }));
     editorRef.current = editor;
-    awareness.setLocalStateField('user', {
-      name: 'Anonymous ' + Math.floor(Math.random() * 100),
-      color: generateRandomColor(),
-    });
 
     const root = mainYDoc.getText(activeTabId);
 

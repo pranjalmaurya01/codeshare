@@ -9,23 +9,11 @@ export const SIDEBAR_ICONS: SidebarIcon[] = [
 ];
 
 export const PROJECT_FILES: FileStructure = {
-  'package.json': 'json',
-  'tsconfig.json': 'json',
+  'package.json': '',
+  'tsconfig.json': '',
   src: {
     'app.tsx': 'tsx',
     'index.tsx': 'tsx',
-    components: {
-      'button.tsx': 'tsx',
-      'card.tsx': 'tsx',
-      'dialog.tsx': 'tsx',
-      'sidebar.tsx': 'tsx',
-      'search.tsx': 'tsx',
-    },
-    lib: {
-      'utils.ts': 'ts',
-      'api.ts': 'ts',
-      'search.ts': 'ts',
-    },
     styles: {
       'globals.css': 'css',
       'components.css': 'css',

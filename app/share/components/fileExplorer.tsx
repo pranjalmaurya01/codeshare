@@ -70,12 +70,7 @@ export function FileExplorer({}: FileExplorerProps) {
                     <FilePlus className='h-4 w-4' />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent
-                  side='bottom'
-                  className='border-zinc-800 bg-zinc-900'
-                >
-                  New File
-                </TooltipContent>
+                <TooltipContent side='bottom'>New File</TooltipContent>
               </Tooltip>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
@@ -88,12 +83,7 @@ export function FileExplorer({}: FileExplorerProps) {
                     <FolderPlus className='h-4 w-4' />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent
-                  side='bottom'
-                  className='border-zinc-800 bg-zinc-900'
-                >
-                  New Folder
-                </TooltipContent>
+                <TooltipContent side='bottom'>New Folder</TooltipContent>
               </Tooltip>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
@@ -106,12 +96,7 @@ export function FileExplorer({}: FileExplorerProps) {
                     <RefreshCw className='h-4 w-4' />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent
-                  side='bottom'
-                  className='border-zinc-800 bg-zinc-900'
-                >
-                  Refresh Explorer
-                </TooltipContent>
+                <TooltipContent side='bottom'>Refresh Explorer</TooltipContent>
               </Tooltip>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
@@ -124,12 +109,7 @@ export function FileExplorer({}: FileExplorerProps) {
                     <CollapseAll className='h-4 w-4' />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent
-                  side='bottom'
-                  className='border-zinc-800 bg-zinc-900'
-                >
-                  Collapse All
-                </TooltipContent>
+                <TooltipContent side='bottom'>Collapse All</TooltipContent>
               </Tooltip>
             </div>
           </TooltipProvider>
