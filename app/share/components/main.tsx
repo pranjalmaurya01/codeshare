@@ -9,9 +9,7 @@ import { EditorSidebar } from './editorSideMenu';
 import { EditorTabs, TabState } from './editorTabs';
 
 function Editor({ id }: { id: string | null }) {
-  const [selectedTheme, setSelectedTheme] =
-    useState<CSSStyleDeclaration | null>(null);
-  const [isEditorReady, setIsEditorReady] = useState(false);
+  const [, setIsEditorReady] = useState(false);
 
   const [tabs, setTabs] = useState<{ active: string; all: TabState[] }>({
     active: 'def',
@@ -64,7 +62,7 @@ function Editor({ id }: { id: string | null }) {
 
   return (
     <Suspense fallback={<div className='h-screen w-screen bg-black/90' />}>
-      <EditorContext.Provider value={{ id, theme: selectedTheme }}>
+      <EditorContext.Provider value={{ id, theme: null }}>
         <div className='flex'>
           <EditorSidebar />
           <div className='flex-1'>
@@ -112,13 +110,8 @@ function Editor({ id }: { id: string | null }) {
               ) : (
                 <div
                   className={cn(
-                    'border-b border-zinc-800 h-full',
-                    !selectedTheme && 'bg-black/90 text-white'
+                    'border-b border-zinc-800 h-full bg-black/90 text-white'
                   )}
-                  style={{
-                    backgroundColor: selectedTheme?.backgroundColor,
-                    color: selectedTheme?.color,
-                  }}
                 />
               )}
             </div>
