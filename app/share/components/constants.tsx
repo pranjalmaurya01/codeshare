@@ -1,5 +1,5 @@
 import { Files, Search, Settings, Users } from 'lucide-react';
-import { FileStructure, SidebarIcon } from './editorSideMenu';
+import { SidebarIcon } from './editorSideMenu';
 
 export const SIDEBAR_ICONS: SidebarIcon[] = [
   { name: 'files', icon: Files, label: 'Explorer' },
@@ -8,15 +8,15 @@ export const SIDEBAR_ICONS: SidebarIcon[] = [
   { name: 'settings', icon: Settings, label: 'Settings' },
 ];
 
-export const PROJECT_FILES: FileStructure = {
-  'package.json': '',
-  'tsconfig.json': '',
-  src: {
-    'app.tsx': 'tsx',
-    'index.tsx': 'tsx',
-    styles: {
-      'globals.css': 'css',
-      'components.css': 'css',
-    },
-  },
-};
+// export const PROJECT_FILES: FileStructure = {
+//   'package.json': '',
+//   'tsconfig.json': '',
+//   src: {
+//     'app.tsx': 'tsx',
+//     'index.tsx': 'tsx',
+//     styles: {
+//       'globals.css': 'css',
+//       'components.css': 'css',
+//     },
+//   },
+// };

@@ -8,8 +8,13 @@ export interface SidebarIcon {
   label: string;
 }
 
-export interface FileStructure {
-  [key: string]: string | FileStructure;
+export interface FileFireBaseI {
+  id?: string;
+  fId: string;
+  path: string;
+  project_id: string;
+  owner: string;
+  created_at: string;
 }
 
 export interface SearchMatch {
@@ -80,6 +85,7 @@ export function EditorSidebar({ className }: SidebarProps) {
           ))}
         </TooltipProvider>
       </div>
+
       {isExpanded && (
         <div className='w-64 transition-all duration-300 ease-in-out'>
           <div className='h-full '>

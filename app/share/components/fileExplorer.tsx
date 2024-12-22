@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Tooltip,
@@ -8,26 +9,25 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import getFirebaseApp from '@/firebase/config';
+import { createNewFile } from '@/firebase/query';
+import { getRandomId } from '@/lib/utils';
+import { collection, getFirestore, onSnapshot } from 'firebase/firestore';
 import {
   ListCollapseIcon as CollapseAll,
   FileIcon,
-  FilePlus,
-  FolderIcon,
-  FolderPlus,
   RefreshCw,
 } from 'lucide-react';
-import { useContext, useState } from 'react';
-import { PROJECT_FILES } from './constants';
+import { useContext, useEffect, useState } from 'react';
 import { EditorContext } from './EditorContext';
-import { FileStructure } from './editorSideMenu';
+import { FileFireBaseI } from './editorSideMenu';
 
 interface FileExplorerProps {
   onToggle: () => void;
 }
 
 export function FileExplorer({}: FileExplorerProps) {
-  const { id } = useContext(EditorContext);
-
+  const { id, setFileState } = useContext(EditorContext);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     src: true,
     components: true,
@@ -37,20 +37,37 @@ export function FileExplorer({}: FileExplorerProps) {
     setExpanded({});
   };
 
-  const handleNewFile = () => {
-    // Implement new file creation
-    console.log('Create new file');
-  };
-
-  const handleNewFolder = () => {
-    // Implement new folder creation
-    console.log('Create new folder');
-  };
-
   const handleRefresh = () => {
     // Implement refresh
     console.log('Refresh file explorer');
   };
+
+  useEffect(() => {
+    let unsubscribe: any;
+    (async () => {
+      const app = getFirebaseApp();
+      const db = getFirestore(app);
+      const filesCol = collection(db, 'files', 'projectId', id);
+
+      unsubscribe = onSnapshot(filesCol, (snapshot) => {
+        const files = snapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        })) as FileFireBaseI[];
+        setFileState(
+          files.sort((a, b) => {
+            return (
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+            );
+          })
+        );
+      });
+    })();
+    return () => unsubscribe?.();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className='flex h-full flex-col'>
@@ -59,7 +76,7 @@ export function FileExplorer({}: FileExplorerProps) {
         <div>
           <TooltipProvider>
             <div className='flex items-center'>
-              <Tooltip delayDuration={0}>
+              {/* <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <Button
                     variant='ghost'
@@ -84,7 +101,7 @@ export function FileExplorer({}: FileExplorerProps) {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side='bottom'>New Folder</TooltipContent>
-              </Tooltip>
+              </Tooltip> */}
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <Button
@@ -113,34 +130,38 @@ export function FileExplorer({}: FileExplorerProps) {
               </Tooltip>
             </div>
           </TooltipProvider>
-          {/* <div className='flex items-center gap-1'>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='ghost' size='icon' className='h-6 w-6'>
-                <MoreHorizontal className='h-4 w-4' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className='w-48 border-zinc-800 bg-zinc-900'>
-              <DropdownMenuItem>
-                <Save className='mr-2 h-4 w-4' />
-                <span>Save Workspace</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <RefreshCw className='mr-2 h-4 w-4' />
-                <span>Refresh Explorer</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='h-6 w-6'
-            onClick={onToggle}
-          >
-            <ChevronRight className='h-4 w-4' />
-          </Button>
-        </div> */}
         </div>
+      </div>
+
+      <div className='flex justify-center'>
+        <form
+          action={async (form) => {
+            const fileName = form.get('filename');
+
+            if (typeof fileName === 'string') {
+              const newFile: FileFireBaseI = {
+                created_at: new Date().toISOString(),
+                fId: getRandomId(),
+                path: fileName,
+                owner: 'pranjal',
+                project_id: id,
+              };
+
+              // setFileState((prev) => {
+              //   return [...prev, newFile];
+              // });
+              createNewFile(newFile);
+            }
+          }}
+        >
+          <Input
+            placeholder='<some-file-name>'
+            className='h-6 w-[90%] px-1 rounded-sm'
+            type='text'
+            autoComplete='false'
+            name='filename'
+          />
+        </form>
       </div>
       <ScrollArea className='flex-1'>
         <div className='p-2'>
@@ -156,57 +177,65 @@ interface FileTreeProps {
   setExpanded: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }
 
-function FileTree({ expanded, setExpanded }: FileTreeProps) {
-  const toggleExpand = (folder: string) => {
-    setExpanded((prev) => ({
-      ...prev,
-      [folder]: !prev[folder],
-    }));
-  };
+function FileTree({}: FileTreeProps) {
+  const { fileState, setTabs } = useContext(EditorContext);
 
-  const renderTree = (tree: FileStructure, path: string = '') => {
-    return Object.entries(tree).map(([key, value]) => {
-      const currentPath = path ? `${path}/${key}` : key;
-      const isFolder = typeof value === 'object';
+  // const toggleExpand = (folder: string) => {
+  //   setExpanded((prev) => ({
+  //     ...prev,
+  //     [folder]: !prev[folder],
+  //   }));
+  // };
 
-      if (isFolder) {
-        return (
-          <div key={currentPath}>
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={() => toggleExpand(currentPath)}
-              className='h-8 w-full justify-start hover:bg-zinc-800'
-            >
-              {expanded[currentPath] ? (
-                <FolderIcon className='mr-2 h-4 w-4 text-yellow-400' />
-              ) : (
-                <FolderIcon className='mr-2 h-4 w-4 text-yellow-400/70' />
-              )}
-              {key}
-            </Button>
-            {expanded[currentPath] && (
-              <div className='ml-4'>
-                {renderTree(value as FileStructure, currentPath)}
-              </div>
-            )}
-          </div>
-        );
-      }
+  const renderTree = (tree: FileFireBaseI[]) => {
+    return tree.map((key) => {
+      // const currentPath = path ? `${path}/${key}` : key;
+      // const isFolder = typeof value === 'object';
+
+      // if (isFolder) {
+      //   return (
+      //     <div key={currentPath}>
+      //       <Button
+      //         variant='ghost'
+      //         size='sm'
+      //         onClick={() => toggleExpand(currentPath)}
+      //         className='h-8 w-full justify-start hover:bg-zinc-800'
+      //       >
+      //         {expanded[currentPath] ? (
+      //           <FolderIcon className='mr-2 h-4 w-4 text-yellow-400' />
+      //         ) : (
+      //           <FolderIcon className='mr-2 h-4 w-4 text-yellow-400/70' />
+      //         )}
+      //         {key}
+      //       </Button>
+      //       {expanded[currentPath] && (
+      //         <div className='ml-4'>
+      //           {renderTree(value as FileFireBaseI[], currentPath)}
+      //         </div>
+      //       )}
+      //     </div>
+      //   );
+      // }
 
       return (
         <Button
-          key={currentPath}
+          key={key.fId}
           variant='ghost'
           size='sm'
           className='h-8 w-full justify-start hover:bg-zinc-800'
+          onClick={() => {
+            setTabs((prev) => ({
+              ...prev,
+              active: key.fId,
+            }));
+          }}
         >
           <FileIcon className='mr-2 h-4 w-4 text-blue-400' />
-          {key}
+          {key.path}
         </Button>
       );
     });
   };
 
-  return <div className='space-y-1'>{renderTree(PROJECT_FILES)}</div>;
+  return <div className='space-y-1'>{renderTree(fileState)}</div>;
 }

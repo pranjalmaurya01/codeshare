@@ -1,6 +1,17 @@
-import { createContext } from 'react';
+import { createContext, Dispatch, SetStateAction } from 'react';
+import { FileFireBaseI } from './editorSideMenu';
+import { TabsStateI } from './main';
 
 export const EditorContext = createContext<{
   activeTabId: string;
-  id: string | null;
-}>({ id: null, activeTabId: '' });
+  id: string;
+  fileState: FileFireBaseI[];
+  setFileState: Dispatch<SetStateAction<FileFireBaseI[]>>;
+  setTabs: Dispatch<SetStateAction<TabsStateI>>;
+}>({
+  id: '',
+  activeTabId: '',
+  fileState: [],
+  setFileState: () => {},
+  setTabs: () => {},
+});

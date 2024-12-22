@@ -8,7 +8,7 @@ import { WebsocketProvider } from 'y-websocket';
 import { Doc } from 'yjs';
 import { generateRandomColor } from '../utils';
 import { EditorContext } from './EditorContext';
-import { EditorSidebar } from './editorSideMenu';
+import { EditorSidebar, FileFireBaseI } from './editorSideMenu';
 import { EditorTabs, TabState } from './editorTabs';
 
 export const mainYDoc = new Doc();
@@ -28,14 +28,13 @@ export interface EditorReadyI {
   showEditor: boolean;
 }
 
+export interface TabsStateI {
+  active: string;
+  all: TabState[];
+}
+
 function Editor() {
-  const [isEditorReady, setIsEditorReady] = useState<EditorReadyI>({
-    isSynced: false,
-    showEditor: false,
-  });
-
   const router = useRouter();
-
   const searchParams = useSearchParams();
   const sid = searchParams.get('id');
   const id = sid && sid.length > 8 ? sid : '' + uniqueInteger();
@@ -44,8 +43,19 @@ function Editor() {
     const params = new URLSearchParams();
     params.set('id', id);
     router.push(`?${params.toString()}`);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const [isEditorReady, setIsEditorReady] = useState<EditorReadyI>({
+    isSynced: false,
+    showEditor: false,
+  });
+  const [fileState, setFileState] = useState<FileFireBaseI[]>([]);
+  const [tabs, setTabs] = useState<TabsStateI>({
+    active: '',
+    all: [],
+  });
 
   const provider = useMemo(() => {
     return new WebsocketProvider(
@@ -68,18 +78,6 @@ function Editor() {
     //   provider.destroy(); // Cleanly close the connection
     // };
   }, [provider]);
-
-  const [tabs, setTabs] = useState<{ active: string; all: TabState[] }>({
-    active: 'a',
-    all: [
-      {
-        id: 'a',
-        label: `new file`,
-        path: 'filepath',
-        isModified: false,
-      },
-    ],
-  });
 
   function createNewFile() {
     const newFile = {
@@ -105,7 +103,15 @@ function Editor() {
 
   return (
     <Suspense fallback={<div className='h-screen w-screen ' />}>
-      <EditorContext.Provider value={{ id, activeTabId: tabs.active }}>
+      <EditorContext.Provider
+        value={{
+          id,
+          activeTabId: tabs.active,
+          fileState,
+          setFileState,
+          setTabs,
+        }}
+      >
         <div className='flex'>
           <EditorSidebar />
           <div className='flex-1'>
@@ -137,11 +143,22 @@ function Editor() {
                   setIsEditorReady={setIsEditorReady}
                 />
               ) : (
-                <div
-                  className={cn(
-                    'border-b border-zinc-800 h-full bg-black text-white'
-                  )}
-                />
+                <div className={cn('h-full flex justify-center items-center')}>
+                  <div>
+                    <h1 className='text-center text-lg'>
+                      {tabs.all.length ? 'Select a file.' : 'Create a file'}
+                    </h1>
+                    <h2 className='text-center'>
+                      Made with ❤️ by{' '}
+                      <a
+                        href='https://pranjalmaurya.vercel.app/'
+                        className='underline'
+                      >
+                        Pranjal
+                      </a>
+                    </h2>
+                  </div>
+                </div>
               )}
             </div>
           </div>

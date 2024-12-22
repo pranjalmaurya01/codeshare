@@ -7,7 +7,6 @@ import { Separator } from '@/components/ui/separator';
 import { Toggle } from '@/components/ui/toggle';
 import { FileIcon, XIcon } from 'lucide-react';
 import * as React from 'react';
-import { PROJECT_FILES } from './constants';
 import { SearchMatch, SearchOptions } from './editorSideMenu';
 
 export function SearchPanel() {
@@ -51,7 +50,7 @@ export function SearchPanel() {
       };
 
       try {
-        searchInTree(PROJECT_FILES);
+        searchInTree({});
       } catch (error) {
         console.error('Invalid regex:', error);
       }
