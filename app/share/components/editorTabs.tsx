@@ -7,9 +7,7 @@ import { X } from 'lucide-react';
 
 export interface TabState {
   id: string;
-  path: string;
   label: string;
-  isModified?: boolean;
 }
 
 interface EditorTabsProps {
@@ -46,28 +44,19 @@ export function EditorTabs({
                 {tab.label}
               </span>
 
-              {tab.isModified ? (
-                <span className='ml-2 flex h-2 w-2'>
-                  <span className='absolute inline-flex h-2 w-2'>
-                    <span className='absolute inline-flex h-full w-full animate-none rounded-full bg-blue-400' />
-                  </span>
-                </span>
-              ) : (
-                // Replace the inner Button with a span for the close icon
-                <span
-                  onClick={(e) => {
-                    onTabClose(tab.id);
-                    e.stopPropagation(); // Prevent the close button from triggering the tab change
-                  }}
-                  className={cn(
-                    'rounded-none opacity-0 hover:bg-zinc-700 group-hover:opacity-100',
-                    activeTab === tab.id && 'opacity-100',
-                    'flex items-center justify-center'
-                  )}
-                >
-                  <X className='h-4 w-4' />
-                </span>
-              )}
+              <span
+                onClick={(e) => {
+                  onTabClose(tab.id);
+                  e.stopPropagation(); // Prevent the close button from triggering the tab change
+                }}
+                className={cn(
+                  'rounded-none opacity-0 hover:bg-zinc-700 group-hover:opacity-100',
+                  activeTab === tab.id && 'opacity-100',
+                  'flex items-center justify-center'
+                )}
+              >
+                <X className='h-4 w-4' />
+              </span>
             </Button>
           ))}
 

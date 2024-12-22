@@ -27,7 +27,7 @@ interface FileExplorerProps {
 }
 
 export function FileExplorer({}: FileExplorerProps) {
-  const { id, setFileState } = useContext(EditorContext);
+  const { id, setFileState, setTabs } = useContext(EditorContext);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     src: true,
     components: true,
@@ -137,11 +137,11 @@ export function FileExplorer({}: FileExplorerProps) {
         <form
           action={async (form) => {
             const fileName = form.get('filename');
-
+            const fId = getRandomId();
             if (typeof fileName === 'string') {
               const newFile: FileFireBaseI = {
                 created_at: new Date().toISOString(),
-                fId: getRandomId(),
+                fId,
                 path: fileName,
                 owner: 'pranjal',
                 project_id: id,
@@ -150,16 +150,30 @@ export function FileExplorer({}: FileExplorerProps) {
               // setFileState((prev) => {
               //   return [...prev, newFile];
               // });
+              setTabs((prev) => ({
+                ...prev,
+                active: fId,
+                all: [
+                  ...prev.all,
+                  {
+                    id: fId,
+                    label: fileName,
+                  },
+                ],
+              }));
+
               createNewFile(newFile);
             }
           }}
         >
           <Input
+            id='new-file'
             placeholder='<some-file-name>'
             className='h-6 w-[90%] px-1 rounded-sm'
             type='text'
             autoComplete='false'
             name='filename'
+            autoFocus
           />
         </form>
       </div>
@@ -224,10 +238,16 @@ function FileTree({}: FileTreeProps) {
           size='sm'
           className='h-8 w-full justify-start hover:bg-zinc-800'
           onClick={() => {
-            setTabs((prev) => ({
-              ...prev,
-              active: key.fId,
-            }));
+            setTabs((prev) => {
+              const filtered = prev.all.filter((p) => p.id === key.fId);
+
+              return {
+                active: key.fId,
+                all: filtered.length
+                  ? [...prev.all]
+                  : [...prev.all, { id: key.fId, label: key.path }],
+              };
+            });
           }}
         >
           <FileIcon className='mr-2 h-4 w-4 text-blue-400' />

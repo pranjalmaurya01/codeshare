@@ -36,7 +36,7 @@ export default function HomePage() {
               variant='secondary'
               className='bg-purple-600 hover:bg-purple-700 text-white'
             >
-              Start Sharing
+              <Link href='/share'>Start Sharing</Link>
             </Button>
           </nav>
         </div>
@@ -57,7 +57,7 @@ export default function HomePage() {
                 variant='secondary'
                 className='bg-purple-600 hover:bg-purple-700 text-white'
               >
-                Get Started
+                <Link href='/share'>Get Started</Link>
               </Button>
               <Button
                 size='lg'

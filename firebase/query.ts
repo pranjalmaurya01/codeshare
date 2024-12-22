@@ -7,7 +7,6 @@ const db = getFirestore(app);
 
 export async function createNewFile(file: FileFireBaseI) {
   try {
-    console.log(file.project_id);
     const filesCol = collection(db, 'files', 'projectId', file.project_id);
     const docRef = await addDoc(filesCol, file);
     console.log('File created with ID:', docRef.id);

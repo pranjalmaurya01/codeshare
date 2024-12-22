@@ -26,7 +26,6 @@
     "react-dom": "^19.0.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^11.0.3",
     "y-monaco": "^0.1.6",
     "y-websocket": "^2.1.0",
     "yjs": "^13.6.20"
