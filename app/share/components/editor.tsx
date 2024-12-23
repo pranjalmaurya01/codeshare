@@ -14,22 +14,23 @@ const CodeMirrorEditor = ({
   isEditorReady,
   setIsEditorReady,
 }: {
-  provider: WebsocketProvider;
+  provider: WebsocketProvider | null;
   activeTabId: string;
   isEditorReady: EditorReadyI;
   setIsEditorReady: Dispatch<SetStateAction<EditorReadyI>>;
 }) => {
   const editorRef = useRef<any>(null);
-  const { awareness } = provider;
 
   useEffect(() => {
-    awareness.on('change', ({ added, updated }: any) => {
+    provider?.awareness.on('change', ({ added, updated }: any) => {
       [...added, ...updated].forEach((userId: number) => {
         if (
-          awareness.getStates().get(userId)?.user &&
-          awareness.getStates().get(userId)?.user.color
+          provider?.awareness.getStates().get(userId)?.user &&
+          provider?.awareness.getStates().get(userId)?.user.color
         ) {
-          addUserSelectionStyle(awareness.getStates().get(userId)?.user.color);
+          addUserSelectionStyle(
+            provider?.awareness.getStates().get(userId)?.user.color
+          );
         }
       });
     });
@@ -47,7 +48,7 @@ const CodeMirrorEditor = ({
       root,
       editorRef.current.getModel(),
       new Set([editorRef.current]),
-      awareness
+      provider?.awareness
     );
   }
 

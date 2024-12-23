@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { WebsocketProvider } from 'y-websocket';
 import { Doc } from 'yjs';
 import { generateRandomColor } from '../utils';
@@ -38,11 +38,20 @@ function Editor() {
   const searchParams = useSearchParams();
   const sid = searchParams.get('id');
   const id = sid && sid.length > 8 ? sid : '' + uniqueInteger();
+  const providerRef = useRef<null | WebsocketProvider>(null);
 
   useEffect(() => {
     const params = new URLSearchParams();
     params.set('id', id);
     router.push(`?${params.toString()}`);
+
+    if (!providerRef.current) {
+      providerRef.current = new WebsocketProvider(
+        process.env.NEXT_PUBLIC_SIGNALING_WEBSOCKET_SERVER!,
+        id,
+        mainYDoc
+      );
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -57,27 +66,21 @@ function Editor() {
     all: [],
   });
 
-  const provider = useMemo(() => {
-    return new WebsocketProvider(
-      process.env.NEXT_PUBLIC_SIGNALING_WEBSOCKET_SERVER!,
-      id,
-      mainYDoc
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   useEffect(() => {
-    provider.on('sync', (event) => {
-      provider.awareness.setLocalStateField('user', {
-        name: 'Anonymous ' + Math.floor(Math.random() * 100),
-        color: generateRandomColor(),
+    const provider = providerRef.current;
+    if (provider) {
+      provider.on('sync', (event) => {
+        provider.awareness.setLocalStateField('user', {
+          name: 'Anonymous ' + Math.floor(Math.random() * 100),
+          color: generateRandomColor(),
+        });
+        setIsEditorReady((prev) => ({ ...prev, isSynced: event }));
       });
-      setIsEditorReady((prev) => ({ ...prev, isSynced: event }));
-    });
-    // return () => {
-    //   provider.destroy(); // Cleanly close the connection
-    // };
-  }, [provider]);
+    }
+    return () => {
+      // provider?.destroy();
+    };
+  }, [providerRef]);
 
   function createNewFile() {
     const newFile = {
@@ -137,7 +140,7 @@ function Editor() {
               {tabs.active ? (
                 <CodeMirrorEditor
                   key={tabs.active}
-                  provider={provider}
+                  provider={providerRef.current}
                   isEditorReady={isEditorReady}
                   activeTabId={tabs.active}
                   setIsEditorReady={setIsEditorReady}
