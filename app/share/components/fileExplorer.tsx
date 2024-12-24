@@ -1,6 +1,11 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import {
+  ContextMenu,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -10,8 +15,9 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import getFirebaseApp from '@/firebase/config';
-import { createNewFile } from '@/firebase/query';
+import { createNewFile, softDeleteFile } from '@/firebase/query';
 import { getRandomId } from '@/lib/utils';
+import { ContextMenuContent } from '@radix-ui/react-context-menu';
 import { collection, getFirestore, onSnapshot } from 'firebase/firestore';
 import {
   ListCollapseIcon as CollapseAll,
@@ -21,6 +27,7 @@ import {
 import { useContext, useEffect, useState } from 'react';
 import { EditorContext } from './EditorContext';
 import { FileFireBaseI } from './editorSideMenu';
+import { TabState } from './editorTabs';
 
 interface FileExplorerProps {
   onToggle: () => void;
@@ -50,10 +57,12 @@ export function FileExplorer({}: FileExplorerProps) {
       const filesCol = collection(db, 'files', 'projectId', id);
 
       unsubscribe = onSnapshot(filesCol, (snapshot) => {
-        const files = snapshot.docs.map((doc) => ({
+        let files = snapshot.docs.map((doc) => ({
           ...doc.data(),
           id: doc.id,
         })) as FileFireBaseI[];
+        files = files.filter((f) => !f.isDelete);
+
         setFileState(
           files.sort((a, b) => {
             return (
@@ -62,6 +71,24 @@ export function FileExplorer({}: FileExplorerProps) {
             );
           })
         );
+        setTabs((prev) => {
+          let active = prev.active;
+          const newTabs: TabState[] = [];
+          prev.all.forEach((a) => {
+            const t = files.find((f) => f.fId === a.id);
+            if (t) {
+              a.label = t.path;
+              newTabs.push(a);
+            }
+          });
+          if (newTabs.length && !newTabs.some((t) => t.id === prev.active)) {
+            active = newTabs[newTabs.length - 1].id;
+          }
+          return {
+            all: newTabs,
+            active: active,
+          };
+        });
       });
     })();
     return () => unsubscribe?.();
@@ -76,32 +103,6 @@ export function FileExplorer({}: FileExplorerProps) {
         <div>
           <TooltipProvider>
             <div className='flex items-center'>
-              {/* <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='h-6 w-6'
-                    onClick={handleNewFile}
-                  >
-                    <FilePlus className='h-4 w-4' />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side='bottom'>New File</TooltipContent>
-              </Tooltip>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='h-6 w-6'
-                    onClick={handleNewFolder}
-                  >
-                    <FolderPlus className='h-4 w-4' />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side='bottom'>New Folder</TooltipContent>
-              </Tooltip> */}
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <Button
@@ -146,10 +147,6 @@ export function FileExplorer({}: FileExplorerProps) {
                 owner: 'pranjal',
                 project_id: id,
               };
-
-              // setFileState((prev) => {
-              //   return [...prev, newFile];
-              // });
               setTabs((prev) => ({
                 ...prev,
                 active: fId,
@@ -162,7 +159,7 @@ export function FileExplorer({}: FileExplorerProps) {
                 ],
               }));
 
-              createNewFile(newFile);
+              await createNewFile(newFile);
             }
           }}
         >
@@ -194,65 +191,53 @@ interface FileTreeProps {
 function FileTree({}: FileTreeProps) {
   const { fileState, setTabs } = useContext(EditorContext);
 
-  // const toggleExpand = (folder: string) => {
-  //   setExpanded((prev) => ({
-  //     ...prev,
-  //     [folder]: !prev[folder],
-  //   }));
-  // };
-
   const renderTree = (tree: FileFireBaseI[]) => {
     return tree.map((key) => {
-      // const currentPath = path ? `${path}/${key}` : key;
-      // const isFolder = typeof value === 'object';
-
-      // if (isFolder) {
-      //   return (
-      //     <div key={currentPath}>
-      //       <Button
-      //         variant='ghost'
-      //         size='sm'
-      //         onClick={() => toggleExpand(currentPath)}
-      //         className='h-8 w-full justify-start hover:bg-zinc-800'
-      //       >
-      //         {expanded[currentPath] ? (
-      //           <FolderIcon className='mr-2 h-4 w-4 text-yellow-400' />
-      //         ) : (
-      //           <FolderIcon className='mr-2 h-4 w-4 text-yellow-400/70' />
-      //         )}
-      //         {key}
-      //       </Button>
-      //       {expanded[currentPath] && (
-      //         <div className='ml-4'>
-      //           {renderTree(value as FileFireBaseI[], currentPath)}
-      //         </div>
-      //       )}
-      //     </div>
-      //   );
-      // }
-
       return (
-        <Button
-          key={key.fId}
-          variant='ghost'
-          size='sm'
-          className='h-8 w-full justify-start hover:bg-zinc-800'
-          onClick={() => {
-            setTabs((prev) => {
-              const filtered = prev.all.filter((p) => p.id === key.fId);
+        <div key={key.fId}>
+          <ContextMenu>
+            <ContextMenuTrigger>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='h-8 w-full justify-start hover:bg-zinc-800'
+                onClick={() => {
+                  setTabs((prev) => {
+                    const filtered = prev.all.filter((p) => p.id === key.fId);
 
-              return {
-                active: key.fId,
-                all: filtered.length
-                  ? [...prev.all]
-                  : [...prev.all, { id: key.fId, label: key.path }],
-              };
-            });
-          }}
-        >
-          <FileIcon className='mr-2 h-4 w-4 text-blue-400' />
-          {key.path}
-        </Button>
+                    return {
+                      active: key.fId,
+                      all: filtered.length
+                        ? [...prev.all]
+                        : [...prev.all, { id: key.fId, label: key.path }],
+                    };
+                  });
+                }}
+              >
+                <FileIcon className='mr-2 h-4 w-4 text-blue-400' />
+                {key.path}
+              </Button>
+            </ContextMenuTrigger>
+            <ContextMenuContent className='w-32'>
+              <ContextMenuItem
+                className='cursor-pointer'
+                onClick={() => {
+                  console.log(key.id);
+                }}
+              >
+                Rename
+              </ContextMenuItem>
+              <ContextMenuItem
+                className='cursor-pointer'
+                onClick={async () => {
+                  await softDeleteFile(key);
+                }}
+              >
+                Delete
+              </ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
+        </div>
       );
     });
   };

@@ -82,26 +82,12 @@ function Editor() {
     };
   }, [providerRef]);
 
-  function createNewFile() {
-    const newFile = {
-      id: 'b',
-      label: `new file`,
-      path: 'filepath',
-      isModified: false,
-    };
-
-    setTabs((prev) => ({
-      ...prev,
-      all: [...prev.all, newFile],
-      active: newFile.id,
-    }));
-  }
-
   // smoothly show black background incase all files have been closed and then a file is opened
   useEffect(() => {
-    if (!tabs.active) {
-      setIsEditorReady((prev) => ({ ...prev, showEditor: true }));
-    }
+    setIsEditorReady((prev) => ({
+      ...prev,
+      showEditor: !!tabs.active.length,
+    }));
   }, [tabs.active]);
 
   return (
@@ -135,7 +121,8 @@ function Editor() {
                 }}
                 tabs={tabs.all}
                 activeTab={tabs.active}
-                onNewFileCreate={createNewFile}
+                // TODO:
+                onNewFileCreate={() => {}}
               />
               {tabs.active ? (
                 <CodeMirrorEditor

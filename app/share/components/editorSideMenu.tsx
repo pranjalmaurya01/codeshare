@@ -15,6 +15,7 @@ export interface FileFireBaseI {
   project_id: string;
   owner: string;
   created_at: string;
+  isDelete?: boolean;
 }
 
 export interface SearchMatch {
